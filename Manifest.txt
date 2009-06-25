@@ -1,0 +1,7 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/glue
+lib/glue.rb
+test/test_glue.rb
