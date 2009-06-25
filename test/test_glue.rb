@@ -3,6 +3,11 @@ require "glue"
 
 class TestGlue < Test::Unit::TestCase
 
+  # TO DO
+  # - Stub Network Tests
+  # - Test user_info method
+  # - Test post method
+
   def setup
     @a      = 'sqd'
     @u      = 'username'

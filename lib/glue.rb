@@ -64,6 +64,7 @@ module Glue
 
 end
 
+# For Reference This is the success responses in XML
 # <rsp stat="ok">
 #   <post>
 #     <id>12415</id>
@@ -80,5 +81,3 @@ end
 #     <admin>true</admin>
 #   </user>
 # </rsp>
-
-	
