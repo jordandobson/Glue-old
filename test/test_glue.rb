@@ -1,5 +1,6 @@
 require "test/unit"
 require "glue"
+require "mocha"
 
 class TestGlue < Test::Unit::TestCase
 
@@ -54,23 +55,14 @@ class TestGlue < Test::Unit::TestCase
   end
   
   def test_site_is_valid
-    actual    = Glue::Client.new( @a, @u, @p ).valid_site?
-    expected  = true
-    assert_equal expected, actual
+    assert @c.valid_site?
   end
 
   def test_site_is_invalid
-    actual    = Glue::Client.new( "x", @u, @p ).valid_site?
-    expected  = false
-    assert_equal expected, actual
+    c = Glue::Client.new("nogood", @u, @p)
+    assert !c.valid_site?
   end
-  
-  def test_site_is_invalid
-    actual    = Glue::Client.new( "x", @u, @p ).valid_site?
-    expected  = false
-    assert_equal expected, actual
-  end
-  
+
 #   def test_options_are_accepted
 #     expected = [:author, :draft]
 #     assert_equal expected, @c.post(@title, @body, :author, :draft)

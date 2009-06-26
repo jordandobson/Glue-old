@@ -16,21 +16,23 @@ module Glue
     USER   = '/api/user'
 
     include  HTTParty
+    format  :xml
 
     def initialize site, user, pass
       raise  AuthError, 'Username, Password or Account is blank.' if site.empty? || user.empty? || pass.empty?
-      @user               = user
-      @pass               = pass
-      @site               = "#{site}.#{DOMAIN}"
-      self.class.base_uri   @site
+      
+      @auth   = { :username => user, :password => pass }
+      @site   = "#{site}.#{DOMAIN}"
+      
+      self.class.base_uri @site
     end
 
     def valid_site?
-      Nokogiri::HTML( open("http://#{@site}")).at('body#login') ? true : false
+      Nokogiri::HTML(open( "http://#{@site}" )).at( 'body#login' ) ? true : false
     end
     
     def user_info
-      self.class.post( USER, :query => {})    
+      self.class.post( USER, :query => {}, :basic_auth => @auth)    
       # RETURNS      
       #       { "rsp"     => { 
       #         "user"    => { 
@@ -46,10 +48,9 @@ module Glue
         :query  =>  {
         :title  =>  title, 
         :body   =>  body, 
-        :draft  =>  opts.include?(:draft), 
-        :author =>  opts.include?(:author)
-      })
-      
+        :draft  =>  opts.include?( :draft  ), 
+        :author =>  opts.include?( :author )},
+        :basic_auth => @auth )
       # RETURNS
       #       { "rsp"     => {
       #         "post"    => {
