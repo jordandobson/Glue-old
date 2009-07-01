@@ -9,9 +9,9 @@ FakeWeb.allow_net_connect = false
 class TestGlue < Test::Unit::TestCase
 
   def setup
-    @a          = 'sqd'
-    @u          = 'username'
-    @p          = 'password'
+    @a          = 'AccountSubDomain'
+    @u          = 'Username'
+    @p          = 'Password'
     @c          = Glue::Client.new( @a, @u, @p )
     @title      = "My Title"
     @body       = "Body Text"
