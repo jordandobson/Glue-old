@@ -6,33 +6,30 @@ require 'open-uri'
 module Glue
 
   VERSION = '0.0.1'
+  DOMAIN  = 'gluenow.com'
 
   class AuthError < StandardError; end
+  class FormatHelper; include HTTParty; format :xml; end
 
-  class Client
-
-    DOMAIN = 'gluenow.com'
+  class API < Glue::FormatHelper
+  
     POST   = '/api/post'
     USER   = '/api/user'
-    NEWS   = '/news/rss'
 
-    include  HTTParty
-    format  :xml
-
-    def initialize site, user, pass
-      raise  AuthError, 'Username, Password or Account is blank.' \
-        if site.empty? || user.empty? || pass.empty?
+    def initialize subdomain, user, pass
+      raise  AuthError, 'Username, Password or Account subdomain is blank.' \
+        if subdomain.empty? || user.empty? || pass.empty?
       @auth   = { :username => user, :password => pass }
-      @site   = "#{site}.#{DOMAIN}"
+      @site   = "#{subdomain}.#{DOMAIN}"
       self.class.base_uri @site
     end
 
     def valid_site?
-      Nokogiri::HTML(open( "http://#{@site}" )).at( 'body#login' ) ? true : false
+      Nokogiri::HTML(open("http://#{@site}")).at('body#login') ? true : false
     end
 
     def user_info
-      self.class.post( USER, :query => {}, :basic_auth => @auth)
+      self.class.post(USER, :query => {}, :basic_auth => @auth)
     end
 
     def post title, body, *opts
@@ -47,6 +44,21 @@ module Glue
       )
     end
 
+  end
+  
+  class RSS < Glue::FormatHelper
+
+    NEWS = '/news/rss'
+    
+    def initialize subdomain
+      raise  AuthError, 'Account Subdomain is missing or blank' if subdomain.empty?
+      self.class.base_uri "#{subdomain}.#{DOMAIN}"
+    end
+    
+    def posts limit=999, page=1
+      self.class.get("#{NEWS}?limit=#{limit}&page=#{page}")
+    end
+  
   end
 
 end
