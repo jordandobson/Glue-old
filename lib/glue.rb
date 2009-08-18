@@ -8,7 +8,7 @@ module Glue
   VERSION = '0.0.1'
   DOMAIN  = 'gluenow.com'
 
-  class AuthError < StandardError; end
+  class AuthError < StandardError;                   end
   class FormatHelper; include HTTParty; format :xml; end
 
   class API < Glue::FormatHelper
@@ -38,8 +38,8 @@ module Glue
         :query      =>  {
         :title      =>  title,
         :body       =>  body,
-        :draft      =>  opts.include?( :draft  ),
-        :author     =>  opts.include?( :author )},
+        :draft      =>  opts.include?( :draft  )  ,
+        :author     =>  opts.include?( :author )  },
         :basic_auth =>  @auth
       )
     end
@@ -55,7 +55,7 @@ module Glue
       self.class.base_uri "#{subdomain}.#{DOMAIN}"
     end
     
-    def posts limit=999, page=1
+    def feed limit=999, page=1
       self.class.get("#{NEWS}?limit=#{limit}&page=#{page}")
     end
   

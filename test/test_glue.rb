@@ -1,10 +1,6 @@
 require "test/unit"
-require "glue"
+require "#{File.dirname(__FILE__)}/../lib/glue.rb"
 require "mocha"
-#require "fakeweb"
-
-# Makes sure this doesn't hit the network
-#FakeWeb.allow_net_connect = false
 
 class TestGlue < Test::Unit::TestCase
 
@@ -14,15 +10,22 @@ class TestGlue < Test::Unit::TestCase
     @password   = 'Password'
     @client     = Glue::API.new( @subdomain, @username, @password )
     @title      = "My Title"
+    @title2     = "Your Title"
     @body       = "Body Text"
+    @body2      = "Hello World"
     @url        = "http://bit.ly/sakIM"
     @id         = "14415"
+    @id2        = "14416"
     @lurl       = "http://jordandobson.com"
+    @guid       = "#{@lurl}##{@id}"
+    @guid2      = "#{@lurl}##{@id2}"
+    @author     = "Jordan"
+    
     @resp_fail  = {}
     
     @resp_ok    = { "rsp"     => {
                     "user"    => {
-                    "author"  => "Jordan",
+                    "author"  => @author,
                     "admin"   => "true"  ,
                     "email"   => nil    },
                     "stat"    => "ok"   }}
@@ -34,7 +37,46 @@ class TestGlue < Test::Unit::TestCase
                     "id"      => @id    , 
                     "longurl" => @lurl  },
                     "stat"    => "ok"   }}
-
+                    
+    @rss        = { "rss"         => {
+                    "channel"     => {
+                    "item"        => {
+                    "pubDate"     => "Fri, 12 Sep 2008 00:00:00 +0000", 
+                    "title"       => @title             , 
+                    "guid"        => @guid              , 
+                    "dc:creator"  => @author            , 
+                    "description" => "<p>#{@body}</p>"  , 
+                    "link"        => @lurl              ,
+                    "source"      => "Glue"             }}}}
+                    
+    @rss_many   = { "rss"         => {
+                    "channel"     => {
+                    "item"        => [{
+                    "pubDate"     => "Fri, 12 Sep 2008 00:00:00 +0000", 
+                    "title"       => @title             , 
+                    "guid"        => @guid              , 
+                    "dc:creator"  => @author            , 
+                    "description" => "<p>#{@body}</p>"  , 
+                    "link"        => @lurl              ,
+                    "source"      => "Glue"             },{
+                    "pubDate"     => "Fri, 12 Sep 2009 00:00:00 +0000", 
+                    "title"       => @title2            , 
+                    "guid"        => @guid2             , 
+                    "dc:creator"  => nil                , 
+                    "description" => "<p>#{@body2}</p>" , 
+                    "link"        => @lurl              ,
+                    "source"      => "Glue"             }]}}}
+                    
+    @rss_empty  = { "rss"         => {
+                    "channel"     => {
+                    "pubDate"     => "Tue, 18 Aug 2009 10:48:28 +0000"  ,
+                    "webMaster"   =>  "glue@jordan.gluenow.com (Glue)"  ,
+                    "link"        =>  "http://jordandobson.com"         }}}
+                    
+    @html_page  = { "html"        => {
+                    "head"        => {
+                    "title"       => "GLUE | Web + Mobile Content Publishing" },
+                    "body"        => "<p>Webpage Body</p>"                    }}
   end
 
   def test_raises_without_account_url
@@ -75,7 +117,7 @@ class TestGlue < Test::Unit::TestCase
 
   def test_site_is_valid
     OpenURI.stubs(:open_uri).returns('<body id="login"></body>')
-    assert @client.valid_site?
+    assert    @client.valid_site?
   end
 
   def test_site_is_invalid
@@ -116,9 +158,61 @@ class TestGlue < Test::Unit::TestCase
     assert_equal   @lurl,    actual["rsp"]["post"]["longurl"]
   end
   
-  def test_posts
-      actual = Glue::RSS.new("jordan").posts(1,2)['rss']['channel']["item"]
-      assert "New Squad Flickr Account", actual["title"]
+  # Need to test pusting with the options
+  
+  def test_reading_single_post
+      Glue::RSS.stubs(:get).returns(@rss)
+      actual      = Glue::RSS.new('jordan').feed(1,1)['rss']['channel']["item"]
+      assert_equal  @title,  actual["title"]
+      assert_match  @body,   actual["description"]
+      assert_equal  @lurl,   actual["link"]
+      assert_equal  @guid,   actual["guid"]
+      assert_equal  @author, actual["dc:creator"]
   end
+  
+  def test_reading_multiple_posts
+      Glue::RSS.stubs(:get).returns(@rss_many)
+      actual      = Glue::RSS.new('jordan').feed['rss']['channel']["item"]
+      assert_equal  2,       actual.length
+
+      # First Article
+      assert_equal  @title,  actual.first["title"]
+      assert_match  @body,   actual.first["description"]
+      assert_equal  @lurl,   actual.first["link"]
+      assert_equal  @guid,   actual.first["guid"]
+      assert_equal  @author, actual.first["dc:creator"]
+
+      # Last Article
+      assert_equal  @title2, actual.last["title"]
+      assert_match  @body2,  actual.last["description"]
+      assert_equal  nil,     actual.last["dc:creator"]
+      assert_equal  @lurl,   actual.last["link"]
+      assert_equal  @guid2,  actual.last["guid"]
+      
+      assert_not_equal  actual.first["title"],       actual.last["title"]
+      assert_not_equal  actual.first["description"], actual.last["description"]
+      assert_not_equal  actual.first["dc:creator"],  actual.last["dc:creator"]
+      assert_not_equal  actual.first["guid"],        actual.last["guid"]
+      assert_equal      actual.first["link"],        actual.last["link"]
+  end
+  
+  def test_no_public_posts_available
+      Glue::RSS.stubs(:get).returns(@rss_empty)
+      subdomain  = 'jordan'
+      actual     = Glue::RSS.new(subdomain).feed
+      assert       actual["rss"]["channel"]
+      assert_nil   actual["rss"]["channel"]["item"]
+      assert_match subdomain,   actual["rss"]["channel"]["webMaster"]
+  end
+  
+  def test_bad_url
+      Glue::RSS.stubs(:get).returns(@html_page)
+      actual    = Glue::RSS.new('666-DIE-666').feed
+      assert      actual["html"]
+      assert_nil  actual["rss"]
+      assert_raise NoMethodError do
+        actual["rss"]["channel"]
+      end      
+   end
 
 end
