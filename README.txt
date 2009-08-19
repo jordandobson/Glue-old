@@ -27,6 +27,8 @@ You can also request public posts from an account using the same RSS that powers
 
 == SYNOPSIS:
 
+---- Adding Posts ----
+
 1. Instantiate your account
 
     * Provide the subdomain, username and password for http://Your-Account.GlueNow.com
@@ -65,7 +67,7 @@ You can also request public posts from an account using the same RSS that powers
     
         response #=> {}
 
-----
+---- Reading Posts ----
         
 1. Instantiate your Reader with your account info
 
@@ -96,10 +98,11 @@ You can also request public posts from an account using the same RSS that powers
 == REQUIREMENTS:
 
 * Mechanize & HTTParty
+* Mocha (for tests)
 
 == INSTALL:
 
-* sudo gem install glue -include-dependencies
+* sudo gem install jordandobson-glue -include-dependencies
 
 == LICENSE:
 

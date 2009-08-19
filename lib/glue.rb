@@ -5,7 +5,7 @@ require 'open-uri'
 
 module Glue
 
-  VERSION = '0.0.1'
+  VERSION = '0.0.2'
   DOMAIN  = 'gluenow.com'
 
   class AuthError < StandardError;                   end

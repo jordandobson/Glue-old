@@ -158,7 +158,7 @@ class TestGlue < Test::Unit::TestCase
     assert_equal   @lurl,    actual["rsp"]["post"]["longurl"]
   end
   
-  # Need to test pusting with the options
+  # Need to test posting with the options
   
   def test_reading_single_post
       Glue::RSS.stubs(:get).returns(@rss)

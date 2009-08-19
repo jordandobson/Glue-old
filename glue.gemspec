@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{glue}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jordan Dobson"]
@@ -20,7 +20,7 @@ You can also request public posts from an account using the same RSS that powers
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{glue}
   s.rubygems_version = %q{1.3.3}
-  s.summary = %q{The Glue gem enables posting to GlueNow.com API service using an account subdomain, username, password}
+  s.summary = %q{The Glue gem enables posting to GlueNow.com API service and reading posts}
   s.test_files = ["test/test_glue.rb"]
 
   if s.respond_to? :specification_version then
